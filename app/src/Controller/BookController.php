@@ -2,11 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\Author;
 use App\Entity\Book;
-use App\Form\AuthorType;
 use App\Form\BookType;
-use App\Repository\AuthorRepository;
 use App\Repository\BookRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,20 +12,23 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 /**
- * @Route("/book")
+ * @Route("/{_locale}/book")
  */
 class BookController extends AbstractController
 {
     /**
      * @Route("/", name="book_index", methods={"GET"})
      *
+     * @param Request $request
      * @param BookRepository $bookRepository
      *
      * @return JsonResponse
      */
-    public function index(BookRepository $bookRepository): JsonResponse
+    public function index(Request $request, BookRepository $bookRepository): JsonResponse
     {
-        return $this->response($bookRepository->findBy([], null, 5));
+        $limit = $request->get('limit', null);
+
+        return $this->response($bookRepository->findBy([], null, $limit));
     }
 
     /**
@@ -99,5 +99,17 @@ class BookController extends AbstractController
         }
 
         return $this->response($qb->getQuery()->getResult());
+    }
+
+    /**
+     * @Route("/{id}", name="book_get", methods={"GET"})
+     *
+     * @param Book $book
+     *
+     * @return JsonResponse
+     */
+    public function show(Book $book): JsonResponse
+    {
+        return $this->response($book);
     }
 }

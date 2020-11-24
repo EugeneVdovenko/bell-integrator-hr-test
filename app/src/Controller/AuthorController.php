@@ -18,10 +18,17 @@ class AuthorController extends AbstractController
 {
     /**
      * @Route("/", name="author_index", methods={"GET"})
+     *
+     * @param Request $request
+     * @param AuthorRepository $authorRepository
+     *
+     * @return JsonResponse
      */
-    public function index(AuthorRepository $authorRepository): JsonResponse
+    public function index(Request $request, AuthorRepository $authorRepository): JsonResponse
     {
-        return $this->response($authorRepository->findAll());
+        $limit = $request->get('limit', null);
+
+        return $this->response($authorRepository->findBy([], null, $limit));
     }
 
     /**
