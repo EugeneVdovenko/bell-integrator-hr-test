@@ -14,10 +14,7 @@ class BookType extends AbstractType
     {
         $builder
             ->add('name')
-            ->add('author', CollectionType::class, [
-                    'entry_type' => AuthorType::class,
-                ]
-            );
+            ->add('author');
     }
 
     public function configureOptions(OptionsResolver $resolver)

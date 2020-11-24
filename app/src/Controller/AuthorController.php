@@ -8,9 +8,7 @@ use App\Repository\AuthorRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 /**
@@ -34,7 +32,7 @@ class AuthorController extends AbstractController
      *
      * @return JsonResponse
      */
-    public function new(Request $request, AuthorRepository $authorRepository): JsonResponse
+    public function new(Request $request): JsonResponse
     {
         $author = new Author();
         $form = $this->createForm(AuthorType::class, $author);

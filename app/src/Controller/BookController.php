@@ -11,7 +11,6 @@ use App\Repository\BookRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
@@ -36,19 +35,18 @@ class BookController extends AbstractController
      * @Route("/create", name="book_new", methods={"GET","POST"})
      *
      * @param Request $request
-     * @param BookRepository $bookRepository
-     * @param AuthorRepository $authorRepository
      *
      * @return JsonResponse
      */
-    public function new(Request $request, BookRepository $bookRepository, AuthorRepository $authorRepository): JsonResponse
+    public function new(Request $request): JsonResponse
     {
+        $data = (new JsonEncoder)->decode($request->getContent(), JsonEncoder::FORMAT);
+
         $book = new Book();
         $form = $this->createForm(BookType::class, $book);
         $form->handleRequest($request);
-        $data = (new JsonEncoder)->decode($request->getContent(), JsonEncoder::FORMAT);
         $form->submit($data);
-dd($data, $form->getData());
+
         if ($form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($book);
@@ -76,5 +74,30 @@ dd($data, $form->getData());
         }
 
         return $this->json($response);
+    }
+
+    /**
+     * @Route("/search", name="book_search", methods={"GET"})
+     *
+     * @param Request $request
+     * @param BookRepository $bookRepository
+     *
+     * @return JsonResponse
+     */
+    public function search(Request $request, BookRepository $bookRepository): JsonResponse
+    {
+        $qb = $bookRepository->createQueryBuilder('t');
+
+        $filter = $request->get('filter', []);
+
+        if ($title = $filter['title'] ?? null) {
+            $title = mb_strtolower($title);
+
+            $qb
+                ->andWhere($qb->expr()->like('lower(t.name)', ':title'))
+                ->setParameter('title', "%{$title}%");
+        }
+
+        return $this->response($qb->getQuery()->getResult());
     }
 }
