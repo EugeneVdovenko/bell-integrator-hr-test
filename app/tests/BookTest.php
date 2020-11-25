@@ -9,9 +9,11 @@ class BookTest extends WebTestCase
     public function testGetBook()
     {
         $client = static::createClient();
-        $client->request('GET', 'http://localhost:8000/book?limit-1');
+        $client->request('GET', '/book?limit-1');
+        $response = $client->getResponse();
+        $this->assertTrue($response->headers->contains('Content-Type', 'application/json'));
+        $this->assertJson($response->getContent());
         $this->assertResponseIsSuccessful();
-        self::assertTrue($client->getResponse()->headers->contains('Content-Type', 'application/json'));
     }
 
     public function testGetAuthor()
@@ -19,6 +21,6 @@ class BookTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', '/author?limit=1');
         $this->assertResponseIsSuccessful();
-        self::assertTrue($client->getResponse()->headers->contains('Content-Type', 'application/json'));
+        $this->assertTrue($client->getResponse()->headers->contains('Content-Type', 'application/json'));
     }
 }
