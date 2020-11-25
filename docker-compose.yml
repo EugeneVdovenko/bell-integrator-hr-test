@@ -1,0 +1,50 @@
+version: "3"
+services:
+  webserver:
+    build:
+      context: ./ws
+    container_name: nginx
+    restart: always
+    tty: true
+    ports:
+      - 443:80
+    working_dir: /var/www
+    volumes:
+      - ./ws/conf:/etc/nginx/conf.d:ro
+      - ./ws/logs:/var/log/nginx/
+      - ../apps/:/var/www/
+    depends_on:
+      - php
+      - db
+    command: [nginx-debug, '-g', 'daemon off;']
+
+  php:
+    build:
+      context: ./php
+    container_name: fpm
+    restart: always
+    tty: true
+    working_dir: /var/www
+    volumes:
+      - ./php/conf/php.ini:/usr/local/etc/php/conf.d/php.ini
+      - ./php/logs:/var/log/php7/
+      - ../apps/:/var/www/
+    ports:
+      - 127.0.0.1:9000:9000
+    expose:
+      - 9000
+  db:
+    build:
+      context: ./db
+    container_name: psql
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      #PGDATA: /var/lib/postgresql/data/pgdata/
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - ./db/init/:/docker-entrypoint-initdb.d/
+      - ./db/data/:/var/lib/postgresql/data/
+      - ./db/logs:/var/log/
