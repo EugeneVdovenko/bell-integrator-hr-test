@@ -19,7 +19,6 @@ final class Version20201123003729 extends AbstractMigration
 
     public function up(Schema $schema) : void
     {
-        $this->addSql('CREATE SCHEMA books');
         $this->addSql('CREATE SEQUENCE author_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE book_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE TABLE author (id INT NOT NULL, name VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
@@ -33,7 +32,6 @@ final class Version20201123003729 extends AbstractMigration
 
     public function down(Schema $schema) : void
     {
-        $this->addSql('DROP SCHEMA bell_i');
         $this->addSql('ALTER TABLE book_author DROP CONSTRAINT FK_9478D345F675F31B');
         $this->addSql('ALTER TABLE book_author DROP CONSTRAINT FK_9478D34516A2B381');
         $this->addSql('DROP SEQUENCE author_id_seq CASCADE');

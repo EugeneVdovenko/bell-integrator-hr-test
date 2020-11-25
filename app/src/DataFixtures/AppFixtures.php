@@ -14,7 +14,8 @@ class AppFixtures extends Fixture
         for ($i = 0; $i < 10000; $i++) {
 
             $book = new Book();
-            $book->setName(sprintf("Книга %s", $i));
+            $book->translate('ru')->setName(sprintf("Книга %s", $i));
+            $book->translate('en')->setName(sprintf("Book %s", $i));
             for ($j = 0; $j < random_int(1, 3); $j++) {
                 $author = new Author();
                 $author->setName(sprintf("Автор %s-%s Авторович", $i, $j));
@@ -22,6 +23,7 @@ class AppFixtures extends Fixture
                 $book->addAuthor($author);
             }
             $manager->persist($book);
+            $book->mergeNewTranslations();
         }
 
         $manager->flush();

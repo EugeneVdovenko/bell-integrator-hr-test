@@ -6,23 +6,22 @@ use App\Repository\BookRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Knp\DoctrineBehaviors\Contract\Entity\TranslatableInterface;
+use Knp\DoctrineBehaviors\Model\Translatable\TranslatableTrait;
 
 /**
  * @ORM\Entity(repositoryClass=BookRepository::class)
  */
-class Book
+class Book implements \JsonSerializable, TranslatableInterface
 {
+    use TranslatableTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $name;
 
     /**
      * @ORM\ManyToMany(targetEntity=Author::class, inversedBy="books")
@@ -37,18 +36,6 @@ class Book
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
     }
 
     /**
@@ -86,8 +73,29 @@ class Book
     {
         return [
             "id" => $this->getId(),
-            "name" => $this->getName(),
+            "name" => $this->translate()->getName(),
             'author' => $this->getAuthor(),
         ];
+    }
+
+    public function __call($method, $arguments)
+    {
+        return $this->proxyCurrentLocaleTranslation($method, $arguments);
+    }
+
+    public function __get($name)
+    {
+        switch ($name) {
+            case 'name':
+                return $this->getName();
+        }
+    }
+
+    public function __set($name, $value)
+    {
+        switch ($name) {
+            case 'name':
+                return $this->setName($value);
+        }
     }
 }

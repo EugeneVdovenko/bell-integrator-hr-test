@@ -3,21 +3,20 @@
 namespace App\Controller;
 
 use App\Entity\Book;
+use App\Entity\BookTranslation;
 use App\Form\BookType;
 use App\Repository\BookRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
-/**
- * @Route("/{_locale}/book")
- */
 class BookController extends AbstractController
 {
     /**
-     * @Route("/", name="book_index", methods={"GET"})
+     * @Route("/book/", name="book_index", methods={"GET"})
      *
      * @param Request $request
      * @param BookRepository $bookRepository
@@ -32,7 +31,7 @@ class BookController extends AbstractController
     }
 
     /**
-     * @Route("/create", name="book_new", methods={"GET","POST"})
+     * @Route("/book/create", name="book_new", methods={"GET","POST"})
      *
      * @param Request $request
      *
@@ -77,7 +76,7 @@ class BookController extends AbstractController
     }
 
     /**
-     * @Route("/search", name="book_search", methods={"GET"})
+     * @Route("/book/search", name="book_search", methods={"GET"})
      *
      * @param Request $request
      * @param BookRepository $bookRepository
@@ -94,15 +93,20 @@ class BookController extends AbstractController
             $title = mb_strtolower($title);
 
             $qb
-                ->andWhere($qb->expr()->like('lower(t.name)', ':title'))
-                ->setParameter('title', "%{$title}%");
+                ->leftJoin(BookTranslation::class, 'bt', Join::WITH, 't.id = bt.translatable_id')
+                ->andWhere($qb->expr()->like('lower(bt.name)', ':title'))
+                ->setParameter('title', "%{$title}%")
+            ;
         }
 
         return $this->response($qb->getQuery()->getResult());
     }
 
     /**
-     * @Route("/{id}", name="book_get", methods={"GET"})
+     * @Route("/{_locale}/book/{id}",
+     *     requirements={
+     *         "_locale": "en|ru",
+     *     }, name="book_get", methods={"GET"})
      *
      * @param Book $book
      *
